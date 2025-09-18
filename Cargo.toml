@@ -3,9 +3,23 @@ name = "dezenmart_rust_smart_contract"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "dezenmart_rust_smart_contract"
+path = "src/main.rs"
+
 [dependencies]
-anchor-lang = "0.29.0"
+anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
 anchor-spl = "0.29.0"
+
+[dev-dependencies]
+tokio = { version = "1.0", features = ["full"] }
+solana-program-test = "1.16"
+solana-sdk = "1.16"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "dezenmart_rust_smart_contract"
+path = "src/main.rs"
 
 [features]
 no-entrypoint = []
