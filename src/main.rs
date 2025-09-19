@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 use std::collections::BTreeMap;
 
-declare_id!("11111111111111111111111111111111");
+declare_id!("FZVgE9vrdTHufoy197xMms8iT61q2xeeqLCAWXnUtC2C");
 
 #[program]
 pub mod dezenmart_logistics {
@@ -465,6 +465,7 @@ pub mod dezenmart_logistics {
 // Account structures
 #[account]
 pub struct GlobalState {
+    pub discriminator: [u8; 8],
     pub admin: Pubkey,
     pub trade_counter: u64,
     pub purchase_counter: u64,
@@ -473,6 +474,7 @@ pub struct GlobalState {
 
 #[account]
 pub struct TradeAccount {
+    pub discriminator: [u8; 8],
     pub trade_id: u64,
     pub seller: Pubkey,
     pub logistics_providers: Vec<Pubkey>,
@@ -489,6 +491,7 @@ pub struct TradeAccount {
 
 #[account]
 pub struct PurchaseAccount {
+    pub discriminator: [u8; 8],
     pub purchase_id: u64,
     pub trade_id: u64,
     pub buyer: Pubkey,
@@ -504,6 +507,7 @@ pub struct PurchaseAccount {
 
 #[account]
 pub struct LogisticsProviderAccount {
+    pub discriminator: [u8; 8],
     pub provider: Pubkey,
     pub is_registered: bool,
     pub bump: u8,
@@ -511,6 +515,7 @@ pub struct LogisticsProviderAccount {
 
 #[account]
 pub struct SellerAccount {
+    pub discriminator: [u8; 8],
     pub seller: Pubkey,
     pub is_registered: bool,
     pub bump: u8,
@@ -518,6 +523,7 @@ pub struct SellerAccount {
 
 #[account]
 pub struct BuyerAccount {
+    pub discriminator: [u8; 8],
     pub buyer: Pubkey,
     pub is_registered: bool,
     pub purchase_ids: Vec<u64>,
