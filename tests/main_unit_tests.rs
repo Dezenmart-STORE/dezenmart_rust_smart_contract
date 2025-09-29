@@ -30,6 +30,7 @@ mod main_tests {
 
         // Test global state initialization
         let mut global_state = GlobalState {
+            discriminator: [0; 8],
             admin: Pubkey::default(),
             trade_counter: 999,
             purchase_counter: 999,
@@ -54,6 +55,7 @@ mod main_tests {
 
         // Simulate register_logistics_provider function logic
         let mut provider_account = LogisticsProviderAccount {
+            discriminator: [0; 8],
             provider: Pubkey::default(),
             is_registered: false,
             bump: 0,
@@ -74,6 +76,7 @@ mod main_tests {
 
         // Simulate register_seller function logic
         let mut seller_account = SellerAccount {
+            discriminator: [0; 8],
             seller: Pubkey::default(),
             is_registered: false,
             bump: 0,
@@ -94,6 +97,7 @@ mod main_tests {
 
         // Simulate register_buyer function logic
         let mut buyer_account = BuyerAccount {
+            discriminator: [0; 8],
             buyer: Pubkey::default(),
             is_registered: false,
             purchase_ids: vec![1, 2, 3], // Should be reset
@@ -160,6 +164,7 @@ mod main_tests {
 
         // Simulate create_trade logic
         let mut global_state = GlobalState {
+            discriminator: [0; 8],
             admin: create_test_pubkey(1),
             trade_counter: 0,
             purchase_counter: 0,
@@ -172,6 +177,7 @@ mod main_tests {
         let product_escrow_fee = (product_cost * ESCROW_FEE_PERCENT) / BASIS_POINTS;
 
         let mut trade_account = TradeAccount {
+            discriminator: [0; 8],
             trade_id,
             seller,
             logistics_providers: logistics_providers.clone(),
@@ -208,6 +214,7 @@ mod main_tests {
 
         // Setup trade account
         let mut trade_account = TradeAccount {
+            discriminator: [0; 8],
             trade_id: 1,
             seller,
             logistics_providers: vec![logistics_provider],
@@ -292,6 +299,7 @@ mod main_tests {
 
         // Simulate purchase creation
         let mut global_state = GlobalState {
+            discriminator: [0; 8],
             admin: create_test_pubkey(1),
             trade_counter: 1,
             purchase_counter: 0,
@@ -302,6 +310,7 @@ mod main_tests {
         let purchase_id = global_state.purchase_counter;
 
         let purchase_account = PurchaseAccount {
+            discriminator: [0; 8],
             purchase_id,
             trade_id: trade_account.trade_id,
             buyer,
@@ -344,6 +353,7 @@ mod main_tests {
 
         // Setup purchase account
         let mut purchase_account = PurchaseAccount {
+            discriminator: [0; 8],
             purchase_id: 1,
             trade_id: 1,
             buyer,
@@ -405,6 +415,7 @@ mod main_tests {
 
         // Test payment calculation logic
         let trade_account = TradeAccount {
+            discriminator: [0; 8],
             trade_id: 1,
             seller,
             logistics_providers: vec![logistics_provider],
@@ -438,6 +449,7 @@ mod main_tests {
 
         // Setup purchase account
         let mut purchase_account = PurchaseAccount {
+            discriminator: [0; 8],
             purchase_id: 1,
             trade_id: 1,
             buyer,
@@ -489,6 +501,7 @@ mod main_tests {
 
         // Setup purchase account
         let mut purchase_account = PurchaseAccount {
+            discriminator: [0; 8],
             purchase_id: 1,
             trade_id: 1,
             buyer,
@@ -503,6 +516,7 @@ mod main_tests {
         };
 
         let mut trade_account = TradeAccount {
+            discriminator: [0; 8],
             trade_id: 1,
             seller,
             logistics_providers: vec![logistics_provider],
@@ -581,6 +595,7 @@ mod main_tests {
 
         // Setup purchase account
         let mut purchase_account = PurchaseAccount {
+            discriminator: [0; 8],
             purchase_id: 1,
             trade_id: 1,
             buyer,
@@ -595,6 +610,7 @@ mod main_tests {
         };
 
         let mut trade_account = TradeAccount {
+            discriminator: [0; 8],
             trade_id: 1,
             seller: create_test_pubkey(5),
             logistics_providers: vec![create_test_pubkey(6)],
@@ -770,6 +786,7 @@ mod main_tests {
         // Initialize global state
         let admin = create_test_pubkey(1);
         let mut global_state = GlobalState {
+            discriminator: [0; 8],
             admin,
             trade_counter: 0,
             purchase_counter: 0,
@@ -779,6 +796,7 @@ mod main_tests {
         // Register logistics provider
         let logistics_provider = create_test_pubkey(2);
         let provider_account = LogisticsProviderAccount {
+            discriminator: [0; 8],
             provider: logistics_provider,
             is_registered: true,
             bump: 255,
@@ -787,6 +805,7 @@ mod main_tests {
         // Register seller
         let seller = create_test_pubkey(3);
         let seller_account = SellerAccount {
+            discriminator: [0; 8],
             seller,
             is_registered: true,
             bump: 255,
@@ -795,6 +814,7 @@ mod main_tests {
         // Register buyer
         let buyer = create_test_pubkey(4);
         let mut buyer_account = BuyerAccount {
+            discriminator: [0; 8],
             buyer,
             is_registered: true,
             purchase_ids: Vec::new(),
@@ -810,6 +830,7 @@ mod main_tests {
         let total_quantity = 10u64;
 
         let mut trade_account = TradeAccount {
+            discriminator: [0; 8],
             trade_id,
             seller,
             logistics_providers: vec![logistics_provider],
@@ -832,6 +853,7 @@ mod main_tests {
         let total_amount = (product_cost + logistics_cost) * buy_quantity;
 
         let mut purchase_account = PurchaseAccount {
+            discriminator: [0; 8],
             purchase_id,
             trade_id,
             buyer,
@@ -882,6 +904,7 @@ mod main_tests {
         // Initialize global state
         let admin = create_test_pubkey(1);
         let mut global_state = GlobalState {
+            discriminator: [0; 8],
             admin,
             trade_counter: 0,
             purchase_counter: 0,
@@ -897,6 +920,7 @@ mod main_tests {
         let total_quantity = 10u64;
 
         let mut trade_account = TradeAccount {
+            discriminator: [0; 8],
             trade_id,
             seller: create_test_pubkey(3),
             logistics_providers: vec![create_test_pubkey(2)],
@@ -919,6 +943,7 @@ mod main_tests {
         let total_amount = (product_cost + logistics_cost) * buy_quantity;
 
         let mut purchase_account = PurchaseAccount {
+            discriminator: [0; 8],
             purchase_id,
             trade_id,
             buyer: create_test_pubkey(4),

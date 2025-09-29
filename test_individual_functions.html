@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DezenMart Individual Function Tester</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .function-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .function-card:hover {
+            transform: translateY(-2px);
+        }
+        .function-title {
+            color: #333;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .function-description {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .explorer-link {
+            background-color: #28a745;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .program-info {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .pda-info {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-ready { background-color: #28a745; }
+        .status-deployed { background-color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 DezenMart Individual Function Tester</h1>
+        <p>Test each smart contract function individually and see results in Solana Explorer</p>
+    </div>
+
+    <div class="program-info">
+        <h2><span class="status-indicator status-deployed"></span>Program Status: Deployed on Devnet</h2>
+        <p><strong>Program ID:</strong> <code>FZVgE9vrdTHufoy197xMms8iT61q2xeeqLCAWXnUtC2C</code></p>
+        <button class="btn explorer-link" onclick="openExplorer('address/FZVgE9vrdTHufoy197xMms8iT61q2xeeqLCAWXnUtC2C')">
+            View Program in Explorer
+        </button>
+    </div>
+
+    <!-- Function 1: Initialize -->
+    <div class="function-card">
+        <div class="function-title">1. 🏁 Initialize Function</div>
+        <div class="function-description">Sets up the global state for the marketplace</div>
+        <div class="pda-info">Global State PDA: 4iymxcnEinwuXhXKRDHb7BR1gwDEz6TobG93JoYhC3uu</div>
+        <button class="btn" onclick="testFunction('initialize', 1)">Test Initialize</button>
+        <button class="btn explorer-link" onclick="openExplorer('address/4iymxcnEinwuXhXKRDHb7BR1gwDEz6TobG93JoYhC3uu')">
+            View Global State
+        </button>
+        <div id="result-1" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- Function 2: Register Logistics Provider -->
+    <div class="function-card">
+        <div class="function-title">2. 📦 Register Logistics Provider</div>
+        <div class="function-description">Registers a logistics provider in the system</div>
+        <div class="pda-info">Provider PDA: 3x6cuwPaNVTqtumxWb7fnpfBmuEwafsq4YmbNfq5XWbu</div>
+        <button class="btn" onclick="testFunction('registerLogisticsProvider', 2)">Test Register Provider</button>
+        <button class="btn explorer-link" onclick="openExplorer('address/3x6cuwPaNVTqtumxWb7fnpfBmuEwafsq4YmbNfq5XWbu')">
+            View Provider Account
+        </button>
+        <div id="result-2" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- Function 3: Register Seller -->
+    <div class="function-card">
+        <div class="function-title">3. 🏪 Register Seller</div>
+        <div class="function-description">Registers a seller in the marketplace</div>
+        <div class="pda-info">Seller PDA: G9RtBpTaLezf8R9oyAktcb8SEoJK1Zd5q1Dpo4QPrVmV</div>
+        <button class="btn" onclick="testFunction('registerSeller', 3)">Test Register Seller</button>
+        <button class="btn explorer-link" onclick="openExplorer('address/G9RtBpTaLezf8R9oyAktcb8SEoJK1Zd5q1Dpo4QPrVmV')">
+            View Seller Account
+        </button>
+        <div id="result-3" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- Function 4: Register Buyer -->
+    <div class="function-card">
+        <div class="function-title">4. 🛒 Register Buyer</div>
+        <div class="function-description">Registers a buyer in the marketplace</div>
+        <div class="pda-info">Buyer PDA: Fq8t3tL82p7vdjM6g6BnYv7TdTgXjtzghExqcQx5HVQf</div>
+        <button class="btn" onclick="testFunction('registerBuyer', 4)">Test Register Buyer</button>
+        <button class="btn explorer-link" onclick="openExplorer('address/Fq8t3tL82p7vdjM6g6BnYv7TdTgXjtzghExqcQx5HVQf')">
+            View Buyer Account
+        </button>
+        <div id="result-4" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- Function 5: Create Trade -->
+    <div class="function-card">
+        <div class="function-title">5. 📋 Create Trade</div>
+        <div class="function-description">Creates a new trade listing</div>
+        <div class="pda-info">Trade PDA: ENTWanhNrCejc7fC26Vyo4eZEFHJCZSLBU3YQrqGfDS7</div>
+        <button class="btn" onclick="testFunction('createTrade', 5)">Test Create Trade</button>
+        <button class="btn explorer-link" onclick="openExplorer('address/ENTWanhNrCejc7fC26Vyo4eZEFHJCZSLBU3YQrqGfDS7')">
+            View Trade Account
+        </button>
+        <div id="result-5" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- Function 6: Buy Trade -->
+    <div class="function-card">
+        <div class="function-title">6. 💰 Buy Trade</div>
+        <div class="function-description">Purchases items from a trade</div>
+        <div class="pda-info">Purchase PDA: EGuSnVGaSLTqGetSV1qbpbGwMiLCVn7XgSpTDL56uxts</div>
+        <button class="btn" onclick="testFunction('buyTrade', 6)">Test Buy Trade</button>
+        <button class="btn explorer-link" onclick="openExplorer('address/EGuSnVGaSLTqGetSV1qbpbGwMiLCVn7XgSpTDL56uxts')">
+            View Purchase Account
+        </button>
+        <div id="result-6" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- Function 7: Confirm Delivery -->
+    <div class="function-card">
+        <div class="function-title">7. ✅ Confirm Delivery and Purchase</div>
+        <div class="function-description">Confirms delivery and completes the purchase</div>
+        <button class="btn" onclick="testFunction('confirmDeliveryAndPurchase', 7)">Test Confirm Delivery</button>
+        <div id="result-7" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- Function 8: Raise Dispute -->
+    <div class="function-card">
+        <div class="function-title">8. ⚠️ Raise Dispute</div>
+        <div class="function-description">Raises a dispute on a purchase</div>
+        <button class="btn" onclick="testFunction('raiseDispute', 8)">Test Raise Dispute</button>
+        <div id="result-8" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- Function 9: Resolve Dispute -->
+    <div class="function-card">
+        <div class="function-title">9. ⚖️ Resolve Dispute</div>
+        <div class="function-description">Resolves a dispute (admin only)</div>
+        <button class="btn" onclick="testFunction('resolveDispute', 9)">Test Resolve Dispute</button>
+        <div id="result-9" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- Function 10: Cancel Purchase -->
+    <div class="function-card">
+        <div class="function-title">10. ❌ Cancel Purchase</div>
+        <div class="function-description">Cancels a purchase and refunds buyer</div>
+        <button class="btn" onclick="testFunction('cancelPurchase', 10)">Test Cancel Purchase</button>
+        <div id="result-10" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- Function 11: Withdraw Escrow Fees -->
+    <div class="function-card">
+        <div class="function-title">11. 💸 Withdraw Escrow Fees</div>
+        <div class="function-description">Withdraws accumulated escrow fees (admin only)</div>
+        <button class="btn" onclick="testFunction('withdrawEscrowFees', 11)">Test Withdraw Fees</button>
+        <div id="result-11" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="program-info">
+        <h3>💡 How to Use This Tester</h3>
+        <p>1. Click any "Test [Function]" button to simulate calling that function</p>
+        <p>2. The result will show you what would happen and provide Explorer links</p>
+        <p>3. To see <strong>real transactions</strong>, use your React frontend application</p>
+        <p>4. Each real function call will create a transaction visible in Solana Explorer</p>
+    </div>
+
+    <script>
+        function testFunction(functionName, cardId) {
+            const resultDiv = document.getElementById(`result-${cardId}`);
+            const button = event.target;
+
+            // Show loading state
+            button.disabled = true;
+            button.textContent = 'Testing...';
+
+            // Simulate testing (in real app, this would call your smart contract)
+            setTimeout(() => {
+                // Generate a mock transaction signature for demonstration
+                const mockTxSignature = generateMockTxSignature();
+
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result info';
+                resultDiv.innerHTML = `
+                    <strong>📋 Function: ${functionName}</strong><br>
+                    <strong>Status:</strong> Ready to test on blockchain<br>
+                    <strong>Note:</strong> This is a simulation. To see real transactions:<br>
+                    1. Use your React frontend to call this function<br>
+                    2. Look for transaction signature in browser console<br>
+                    3. View transaction in Explorer using the signature<br><br>
+                    <strong>Example transaction format:</strong><br>
+                    <code>${mockTxSignature}</code><br>
+                    <button class="btn explorer-link" onclick="alert('Use your frontend to generate real transactions!')">
+                        View Example in Explorer
+                    </button>
+                `;
+
+                // Reset button
+                button.disabled = false;
+                button.textContent = `Test ${functionName}`;
+
+            }, 1500);
+        }
+
+        function generateMockTxSignature() {
+            // Generate a realistic-looking transaction signature
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 88; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function openExplorer(path) {
+            window.open(`https://explorer.solana.com/${path}?cluster=devnet`, '_blank');
+        }
+
+        // Show program status on load
+        window.addEventListener('load', () => {
+            console.log('🚀 DezenMart Function Tester Loaded');
+            console.log('Program ID: FZVgE9vrdTHufoy197xMms8iT61q2xeeqLCAWXnUtC2C');
+            console.log('Network: Solana Devnet');
+            console.log('Use your React frontend for real transactions!');
+        });
+    </script>
+</body>
+</html>
