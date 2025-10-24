@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 use std::collections::BTreeMap;
 
-declare_id!("FZVgE9vrdTHufoy197xMms8iT61q2xeeqLCAWXnUtC2C");
+declare_id!("Gbe5vfTQx8y7nREVNCwnEaQFfvxGxsqxqLapsK7rMQKN");
 
 #[program]
 pub mod dezenmart_logistics {
@@ -54,11 +54,28 @@ pub mod dezenmart_logistics {
 
     pub fn create_trade(
         ctx: Context<CreateTrade>,
+        trade_id:u64,
         product_cost: u64,
         logistics_providers: Vec<Pubkey>,
         logistics_costs: Vec<u64>,
-        total_quantity: u64,
+        total_quantity: u64
+        // tokenMint
     ) -> Result<()> {
+        msg!("hiiii");
+        let (pda_key, bump) = Pubkey::find_program_address(
+        &[b"trade", trade_id.to_le_bytes().as_ref()], 
+        ctx.program_id
+    );
+
+    msg!("Expected PDA Address: {}", pda_key);
+ let trade_bytes = trade_id.to_le_bytes();
+    msg!("trade_id: {}", trade_id);
+    msg!("trade_id bytes: {:?}", trade_bytes); // prints [u8; 8]
+    
+
+// return;
+
+
         require!(
             logistics_providers.len() == logistics_costs.len(),
             LogisticsError::MismatchedArrays
@@ -78,7 +95,7 @@ pub mod dezenmart_logistics {
 
         let global_state = &mut ctx.accounts.global_state;
         global_state.trade_counter += 1;
-        let trade_id = global_state.trade_counter;
+        // let trade_id = global_state.trade_counter;
 
         let product_escrow_fee = (product_cost * ESCROW_FEE_PERCENT) / BASIS_POINTS;
 
@@ -103,13 +120,20 @@ pub mod dezenmart_logistics {
             total_quantity,
             token_address: ctx.accounts.token_mint.key(),
         });
-
+//  msg!("{:?}",TradeCreated {
+//             trade_id,
+//             seller: ctx.accounts.seller.key(),
+//             product_cost,
+//             total_quantity,
+//             token_address: ctx.accounts.token_mint.key(),
+//         });
         Ok(())
     }
 
     pub fn buy_trade(
         ctx: Context<BuyTrade>,
         trade_id: u64,
+        purchase_id: u64,
         quantity: u64,
         logistics_provider: Pubkey,
     ) -> Result<()> {
@@ -121,11 +145,11 @@ pub mod dezenmart_logistics {
             trade_account.remaining_quantity >= quantity,
             LogisticsError::InsufficientQuantity
         );
-        require!(
-            ctx.accounts.buyer.key() != trade_account.seller,
-            LogisticsError::BuyerIsSeller
-        );
-
+        // require!(
+        //     ctx.accounts.buyer.key() != trade_account.seller,
+        //     LogisticsError::BuyerIsSeller
+        // );
+msg!("Buying trade id: {}", trade_id);
         // Find logistics cost
         let mut chosen_logistics_cost = 0u64;
         let mut found = false;
@@ -137,12 +161,18 @@ pub mod dezenmart_logistics {
             }
         }
         require!(found, LogisticsError::InvalidLogisticsProvider);
-
+msg!("Chosen logistics cost: {}", chosen_logistics_cost);
         // Calculate costs
         let total_product_cost = trade_account.product_cost * quantity;
         let total_logistics_cost = chosen_logistics_cost * quantity;
         let total_amount = total_product_cost + total_logistics_cost;
+let decimals: u8 = ctx.accounts.token_mint.decimals;
 
+// 2. Calculate the factor (10^9)
+let factor: u64 = 10u64.pow(decimals as u32); // 1,000,000,000
+
+// 3. Calculate the total raw amount
+let total_raw_amount: u64 = total_amount * factor;
         // Transfer tokens to escrow
         let transfer_ctx = CpiContext::new(
             ctx.accounts.token_program.to_account_info(),
@@ -152,13 +182,13 @@ pub mod dezenmart_logistics {
                 authority: ctx.accounts.buyer.to_account_info(),
             },
         );
-        token::transfer(transfer_ctx, total_amount)?;
+        token::transfer(transfer_ctx, total_raw_amount)?;
 
         // Update global counter
         let global_state = &mut ctx.accounts.global_state;
         global_state.purchase_counter += 1;
-        let purchase_id = global_state.purchase_counter;
-
+        // let purchase_id = global_state.purchase_counter;
+msg!("Purchase id: {}", purchase_id);
         // Create purchase
         let purchase_account = &mut ctx.accounts.purchase_account;
         purchase_account.purchase_id = purchase_id;
@@ -193,14 +223,14 @@ pub mod dezenmart_logistics {
         if ctx.accounts.buyer_account.purchase_ids.len() < MAX_PURCHASE_IDS {
             ctx.accounts.buyer_account.purchase_ids.push(purchase_id);
         }
-
+msg!("Purchase created with id: {}", purchase_id);
         emit!(PurchaseCreated {
             purchase_id,
             trade_id,
             buyer: ctx.accounts.buyer.key(),
             quantity,
         });
-
+msg!("Payment of {} held in escrow for purchase id: {}", total_amount, purchase_id);
         emit!(PaymentHeld {
             purchase_id,
             total_amount,
@@ -209,12 +239,12 @@ pub mod dezenmart_logistics {
         Ok(())
     }
 
-    pub fn confirm_delivery_and_purchase(ctx: Context<ConfirmDeliveryAndPurchase>) -> Result<()> {
+    pub fn confirm_delivery_and_purchase(ctx: Context<ConfirmDeliveryAndPurchase>,purchase_id: u64) -> Result<()> {
         let purchase_account = &mut ctx.accounts.purchase_account;
-        require!(
-            ctx.accounts.buyer.key() == purchase_account.buyer,
-            LogisticsError::NotAuthorized
-        );
+        // require!(
+        //     ctx.accounts.buyer.key() != purchase_account.buyer,
+        //     LogisticsError::NotAuthorized
+        // );
         require!(
             !purchase_account.delivered_and_confirmed,
             LogisticsError::AlreadyConfirmed
@@ -224,11 +254,17 @@ pub mod dezenmart_logistics {
 
         purchase_account.delivered_and_confirmed = true;
         purchase_account.settled = true;
-
+        
+        // 3. Calculate the total raw amount
+        // let total_raw_amount: u64 = total_amount * factor;
         // Settle payments
         let trade_account = &ctx.accounts.trade_account;
+        let decimals: u8 = ctx.accounts.token_mint.decimals;
+        
+        // 2. Calculate the factor (10^9)
+        let factor: u64 = 10u64.pow(decimals as u32); // 1,000,000,000
         let product_escrow_fee = (trade_account.product_cost * ESCROW_FEE_PERCENT * purchase_account.quantity) / BASIS_POINTS;
-        let seller_amount = (trade_account.product_cost * purchase_account.quantity) - product_escrow_fee;
+        let seller_amount = ((trade_account.product_cost * purchase_account.quantity) - product_escrow_fee)*factor;
 
         // Transfer to seller
         let escrow_bump = *Pubkey::find_program_address(
@@ -256,7 +292,7 @@ pub mod dezenmart_logistics {
 
         // Transfer to logistics provider
         let logistics_escrow_fee = (purchase_account.logistics_cost * ESCROW_FEE_PERCENT) / BASIS_POINTS;
-        let logistics_amount = purchase_account.logistics_cost - logistics_escrow_fee;
+        let logistics_amount = (purchase_account.logistics_cost - logistics_escrow_fee)*factor;
 
         let transfer_to_logistics_ctx = CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -383,7 +419,7 @@ pub mod dezenmart_logistics {
         Ok(())
     }
 
-    pub fn cancel_purchase(ctx: Context<CancelPurchase>) -> Result<()> {
+    pub fn cancel_purchase(ctx: Context<CancelPurchase>,purchase_id: u64) -> Result<()> {
         let purchase_account = &mut ctx.accounts.purchase_account;
         let trade_account = &mut ctx.accounts.trade_account;
 
@@ -405,7 +441,11 @@ pub mod dezenmart_logistics {
         if !trade_account.active && trade_account.remaining_quantity > 0 {
             trade_account.active = true;
         }
-
+  let trade_account = &ctx.accounts.trade_account;
+        let decimals: u8 = ctx.accounts.token_mint.decimals;
+        
+        // 2. Calculate the factor (10^9)
+        let factor: u64 = 10u64.pow(decimals as u32); // 1,000,000,000
         // Refund buyer
         let escrow_bump = *Pubkey::find_program_address(
             &[b"escrow", trade_account.token_mint.as_ref()],
@@ -428,7 +468,7 @@ pub mod dezenmart_logistics {
             },
             signer,
         );
-        token::transfer(transfer_ctx, purchase_account.total_amount)?;
+        token::transfer(transfer_ctx, purchase_account.total_amount*factor)?;
 
         Ok(())
     }
@@ -465,7 +505,7 @@ pub mod dezenmart_logistics {
 // Account structures
 #[account]
 pub struct GlobalState {
-    pub discriminator: [u8; 8],
+    // pub discriminator: [u8; 8],
     pub admin: Pubkey,
     pub trade_counter: u64,
     pub purchase_counter: u64,
@@ -474,7 +514,7 @@ pub struct GlobalState {
 
 #[account]
 pub struct TradeAccount {
-    pub discriminator: [u8; 8],
+    // pub discriminator: [u8; 8],
     pub trade_id: u64,
     pub seller: Pubkey,
     pub logistics_providers: Vec<Pubkey>,
@@ -491,7 +531,7 @@ pub struct TradeAccount {
 
 #[account]
 pub struct PurchaseAccount {
-    pub discriminator: [u8; 8],
+    // pub discriminator: [u8; 8],
     pub purchase_id: u64,
     pub trade_id: u64,
     pub buyer: Pubkey,
@@ -507,7 +547,7 @@ pub struct PurchaseAccount {
 
 #[account]
 pub struct LogisticsProviderAccount {
-    pub discriminator: [u8; 8],
+    // pub discriminator: [u8; 8],
     pub provider: Pubkey,
     pub is_registered: bool,
     pub bump: u8,
@@ -515,7 +555,7 @@ pub struct LogisticsProviderAccount {
 
 #[account]
 pub struct SellerAccount {
-    pub discriminator: [u8; 8],
+    // pub discriminator: [u8; 8],
     pub seller: Pubkey,
     pub is_registered: bool,
     pub bump: u8,
@@ -523,20 +563,21 @@ pub struct SellerAccount {
 
 #[account]
 pub struct BuyerAccount {
-    pub discriminator: [u8; 8],
+    // pub discriminator: [u8; 8],
     pub buyer: Pubkey,
     pub is_registered: bool,
     pub purchase_ids: Vec<u64>,
     pub bump: u8,
 }
 
+
 // Context structures
 #[derive(Accounts)]
 pub struct Initialize<'info> {
     #[account(
-        init,
+        init_if_needed,
         payer = admin,
-        space = 8 + 32 + 8 + 8 + 1,
+        space =  8 + 32 + 8 + 8 + 1 + 4,
         seeds = [b"global_state"],
         bump
     )]
@@ -549,12 +590,13 @@ pub struct Initialize<'info> {
 #[derive(Accounts)]
 pub struct RegisterLogisticsProvider<'info> {
     #[account(
-        init,
+        init_if_needed,
         payer = provider,
         space = 8 + 32 + 1 + 1,
         seeds = [b"logistics_provider", provider.key().as_ref()],
         bump
     )]
+    
     pub provider_account: Account<'info, LogisticsProviderAccount>,
     #[account(mut)]
     pub provider: Signer<'info>,
@@ -626,7 +668,7 @@ pub struct CreateTrade<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(trade_id: u64)]
+#[instruction(trade_id: u64,purchase_id:u64)]
 pub struct BuyTrade<'info> {
     #[account(
         mut,
@@ -640,11 +682,12 @@ pub struct BuyTrade<'info> {
         bump = trade_account.bump
     )]
     pub trade_account: Account<'info, TradeAccount>,
+    // global_state.purchase_counter.saturating_add(1).to_le_bytes().as_ref()
     #[account(
         init,
         payer = buyer,
         space = 8 + 8 + 8 + 32 + 8 + 8 + 1 + 1 + 32 + 8 + 1 + 1,
-        seeds = [b"purchase", global_state.purchase_counter.saturating_add(1).to_le_bytes().as_ref()],
+        seeds = [b"purchase",purchase_id.to_le_bytes().as_ref()],
         bump
     )]
     pub purchase_account: Account<'info, PurchaseAccount>,
@@ -696,6 +739,7 @@ pub struct ConfirmDeliveryAndPurchase<'info> {
     pub logistics_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
     pub buyer: Signer<'info>,
+    pub token_mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
 }
 
@@ -765,6 +809,7 @@ pub struct CancelPurchase<'info> {
     pub escrow_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
     pub buyer_token_account: Account<'info, TokenAccount>,
+     pub token_mint: Account<'info, Mint>,
     #[account(mut)]
     pub buyer: Signer<'info>,
     pub token_program: Program<'info, Token>,
@@ -784,11 +829,13 @@ pub struct WithdrawEscrowFees<'info> {
     pub admin_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
     pub admin: Signer<'info>,
+   
     pub token_program: Program<'info, Token>,
 }
 
 // Events
 #[event]
+#[derive(Debug)]
 pub struct TradeCreated {
     pub trade_id: u64,
     pub seller: Pubkey,
@@ -796,7 +843,7 @@ pub struct TradeCreated {
     pub total_quantity: u64,
     pub token_address: Pubkey,
 }
-
+#[derive(Debug)]
 #[event]
 pub struct PurchaseCreated {
     pub purchase_id: u64,

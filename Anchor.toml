@@ -4,7 +4,7 @@ skip-lint = false
 resolution = true
 
 [programs.localnet]
-dezenmart_rust_smart_contract = "11111111111111111111111111111111"
+dezenmart_rust_smart_contract = "FZVgE9vrdTHufoy197xMms8iT61q2xeeqLCAWXnUtC2C"
 
 [programs.devnet]
 dezenmart_rust_smart_contract = "FZVgE9vrdTHufoy197xMms8iT61q2xeeqLCAWXnUtC2C"
@@ -16,7 +16,7 @@ dezenmart_rust_smart_contract = "11111111111111111111111111111111"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Devnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
@@ -28,4 +28,5 @@ members = [
 ]
 
 [toolchain]
-anchor_version = "0.29.0"
+anchor_version = "0.31.0"
+
